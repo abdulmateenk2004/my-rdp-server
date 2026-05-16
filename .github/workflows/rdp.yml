@@ -1,0 +1,22 @@
+name: USA High Speed RDP
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Tailscale Connect
+      shell: powershell
+      run: |
+        iex (IWR 'https://tailscale.com/install.ps1' -UseBasicParsing)
+        tailscale up --authkey tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
+    - name: Keep RDP Alive
+      shell: powershell
+      run: |
+        $seconds = 21600
+        while ($seconds -gt 0) {
+            Write-Output "RDP chal rahi hai... Baqi waqt: $seconds seconds"
+            Start-Sleep -Seconds 60
+            $seconds -= 60
+        }
