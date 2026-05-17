@@ -6,17 +6,21 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Tailscale Connect
+    - name: Download and Install Tailscale
       shell: powershell
       run: |
+        Save-Module -Name Tailscale -Path . -Force -ErrorAction SilentlyContinue
         iex (IWR 'https://tailscale.com/install.ps1' -UseBasicParsing)
-        tailscale up --authkey tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
+    - name: Connect to Tailscale
+      shell: powershell
+      run: |
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
     - name: Keep RDP Alive
       shell: powershell
       run: |
         $seconds = 21600
         while ($seconds -gt 0) {
-            Write-Output "RDP chal rahi hai... Baqi waqt: $seconds seconds"
+            Write-Output "RDP Active hai... Remaining: $seconds seconds"
             Start-Sleep -Seconds 60
             $seconds -= 60
         }
