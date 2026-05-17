@@ -4,25 +4,23 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-latest
     steps:
-    - name: Enable Windows Remote Desktop (RDP)
-      shell: powershell
+    - name: Enable Remote Desktop & Fix Firewall
       run: |
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-    - name: Download and Connect Tailscale
-      shell: powershell
+        powershell -Command "Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0"
+        powershell -Command "Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name 'UserAuthentication' -Value 0"
+        powershell -Command "Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'"
+
+    - name: Download and Install Tailscale MSI
       run: |
-        iex (IWR 'https://tailscale.com/install.ps1' -UseBasicParsing)
-        tailscale up --authkey=tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
+        powershell -Command "Invoke-WebRequest -Uri 'https://pkgs.tailscale.com/stable/tailscale-setup-latest.msi' -OutFile 'tailscale.msi'"
+        msiexec.exe /i tailscale.msi /qn /norestart
+
+    - name: Authenticate Tailscale
+      run: |
+        powershell -Command "& 'C:\Program Files\Tailscale\tailscale.exe' up --authkey=tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR"
+
     - name: Keep RDP Alive
-      shell: powershell
       run: |
-        $seconds = 21600
-        while ($seconds -gt 0) {
-            Write-Output "RDP Active hai... Remaining: $seconds seconds"
-            Start-Sleep -Seconds 60
-            $seconds -= 60
-        }
+        powershell -Command "$seconds = 21600; while ($seconds -gt 0) { Write-Output 'RDP Active hai... Remaining: '$seconds' seconds'; Start-Sleep -Seconds 60; $seconds -= 60 }"
