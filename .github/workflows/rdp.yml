@@ -4,26 +4,19 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
-    - name: Install Tailscale via Choco
-      shell: powershell
-      run: |
-        choco install tailscale -y
     - name: Enable Windows Remote Desktop (RDP)
       shell: powershell
       run: |
-        # RDP setting Registry mein enable karna
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        # Network Level Authentication (NLA) ko off karna taake bina password login ho sake
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
-        # RDP Firewall rules ko allow karna
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-    - name: Run Tailscale Service & Connect
+    - name: Download and Connect Tailscale
       shell: powershell
       run: |
-        Start-Service -Name "Tailscale" -ErrorAction SilentlyContinue
-        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
+        iex (IWR 'https://tailscale.com/install.ps1' -UseBasicParsing)
+        tailscale up --authkey=tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
     - name: Keep RDP Alive
       shell: powershell
       run: |
