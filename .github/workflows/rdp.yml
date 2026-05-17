@@ -6,14 +6,14 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Download and Install Tailscale
+    - name: Install Tailscale via Choco
       shell: powershell
       run: |
-        Save-Module -Name Tailscale -Path . -Force -ErrorAction SilentlyContinue
-        iex (IWR 'https://tailscale.com/install.ps1' -UseBasicParsing)
-    - name: Connect to Tailscale
+        choco install tailscale -y
+    - name: Run Tailscale Service & Connect
       shell: powershell
       run: |
+        Start-Service -Name "Tailscale" -ErrorAction SilentlyContinue
         & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=tskey-auth-ku1TgFN39s11CNTRL-im2YdLucP3SbDvArAnsL3Sv9NoDJugXR
     - name: Keep RDP Alive
       shell: powershell
