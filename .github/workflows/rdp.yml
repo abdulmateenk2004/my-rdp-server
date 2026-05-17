@@ -10,6 +10,15 @@ jobs:
       shell: powershell
       run: |
         choco install tailscale -y
+    - name: Enable Windows Remote Desktop (RDP)
+      shell: powershell
+      run: |
+        # RDP setting Registry mein enable karna
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        # Network Level Authentication (NLA) ko off karna taake bina password login ho sake
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+        # RDP Firewall rules ko allow karna
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
     - name: Run Tailscale Service & Connect
       shell: powershell
       run: |
