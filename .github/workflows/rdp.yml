@@ -4,9 +4,21 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
-    - name: Setup RDP Connection Automatically
-      uses: vishalvshekkar/remotely-easy@v1
-      with:
-        creds: ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Download Ngrok
+      run: |
+        Invoke-WebRequest -Uri "https://bin.equinox.io/c/b34edq65oax/ngrok-stable-windows-amd64.zip" -OutFile "ngrok.zip"
+        Expand-Archive -Path "ngrok.zip" -DestinationPath "."
+    - name: Connect Ngrok & Enable RDP
+      run: |
+        .\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+        start-process .\ngrok.exe -ArgumentList "tcp 3389"
+    - name: Keep RDP Alive Loop
+      run: |
+        $seconds = 21600
+        while ($seconds -gt 0) {
+            Write-Output "RDP Chal rahi hai... Remaining: $seconds seconds"
+            Start-Sleep -Seconds 60
+            $seconds -= 60
+        }
